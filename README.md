@@ -12,6 +12,19 @@ Sharing variables across the H7 dual-core bus requires getting three things righ
 
 Failing any of these results in silent data corruption. `SHMBlock` guarantees all three in a single call.
 
+## Repository Structure
+
+```text
+STM32H7-DualCore-SHM/
+├── Inc/
+│   └── stm32h7_dualcore_shm.hpp    # Core library header for Common/Inc
+├── examples/
+│   ├── linker_script_ex.ld         # Linker script snippets for RAM_D3 setup
+│   └── main.cpp                    # Integration example for M7 and M4 cores
+├── LICENSE
+└── README.md
+```
+
 ## Under the Hood
 Each call to `access()` executes a strict hardware sequence:
 * **Acquire:** Attempts to lock HSEM Channel 24 using the 2-step read/write protocol. 
@@ -105,7 +118,7 @@ SECTIONS
 }
 ```
 
-### Constraints & Hardware Rules
+## Constraints & Hardware Rules
 * **Clock Configuration:** The header file assumes the microcontroller is running at maximum clock speeds (480MHz for M7, 240MHz for M4). The `SYSTEM_CORE_CLOCK_M7` and `SYSTEM_CORE_CLOCK_M4` constants at the top of the header file **must** match the clock tree speeds in STM32CubeMX, or the timeouts will be inaccurate.
 * **Clock Enable:** `__HAL_RCC_HSEM_CLK_ENABLE()` must be called on both cores at startup before making any `access()` calls.
 * **Cacheability:** The library assumes the shared RAM is configured in the MPU as Normal Cacheable memory. If the MPU marks it as strongly-ordered or non-cacheable, the `SCB` flush calls will safely act as harmless no-ops.
